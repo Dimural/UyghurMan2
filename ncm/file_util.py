@@ -5,20 +5,26 @@ from mutagen.id3 import ID3, APIC, TPE1, TIT2, TALB, TRCK, error
 from PIL import Image
 
 
+
 def resize_img(file_path, max_size=(640, 640), quality=90):
     try:
         img = Image.open(file_path)
+        if img.size[0] > max_size[0] or img.size[1] > max_size[1]:
+            img.thumbnail(max_size, Image.LANCZOS)
+            img = img.convert('RGB')
+            img.save(file_path, quality=quality)
+
     except IOError:
         print('Can\'t open image:', file_path)
         return
 
-    if img.size[0] > max_size[0] or img.size[1] > max_size[1]:
-        img.thumbnail(max_size, Image.ANTIALIAS)
-        img = img.convert('RGB')
-        img.save(file_path, quality=quality)
+    #if img.size[0] > max_size[0] or img.size[1] > max_size[1]:
+        #img.thumbnail(max_size, Image.ANTIALIAS)
+        #img = img.convert('RGB')
+        #img.save(file_path, quality=quality)
 
 
-def add_metadata_to_song(file_path, cover_path, song, is_program=False):
+def add_metadata_to_song(file_path, cover_path, song, is_program=False, custom_name = None):
     # If no ID3 tags in mp3 file
     try:
         audio = MP3(file_path, ID3=ID3)
@@ -63,10 +69,11 @@ def add_metadata_to_song(file_path, cover_path, song, is_program=False):
         )
     )
     # add song name
+    title = custom_name if custom_name else song['name']
     id3.add(
         TIT2(
             encoding=3,
-            text=song['name']
+            text=title
         )
     )
     # add album name

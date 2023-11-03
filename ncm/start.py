@@ -60,7 +60,7 @@ def get_parse_id(song_id):
     return song_id
 
 
-def main():
+def main(args=None, custom_name=None):
     parser = argparse.ArgumentParser(description='Welcome to netease cloud music downloader!')
     parser.add_argument('-s', metavar='song_id', dest='song_id',
                         help='Download a song by song_id')
@@ -76,24 +76,27 @@ def main():
                         help='Download a playlist all songs by playlist_id')
     parser.add_argument('-ua', metavar='user_agent', dest='user_agent',
                         help='Specify the User-Agent to be used when downloading')
-    args = parser.parse_args()
-    if args.user_agent:
-        headers.update({'User-Agent':args.user_agent})
-    if args.song_id:
-        download_song_by_id(get_parse_id(args.song_id), config.DOWNLOAD_DIR)
-    elif args.song_ids:
-        for song_id in args.song_ids:
-            download_song_by_id(get_parse_id(song_id), config.DOWNLOAD_DIR)
-    elif args.artist_id:
-        download_hot_songs(get_parse_id(args.artist_id))
-    elif args.album_id:
-        download_album_songs(get_parse_id(args.album_id))
-    elif args.playlist_id:
-        download_playlist_songs(get_parse_id(args.playlist_id))
-    elif args.program_id:
-        download_program(get_parse_id(args.program_id))
+
+
+    parsed_args = parser.parse_args(args)
+
+    if parsed_args.user_agent:
+        headers.update({'User-Agent':parsed_args.user_agent})
+    if parsed_args.song_id:
+        download_song_by_id(get_parse_id(parsed_args.song_id), config.DOWNLOAD_DIR, custom_name=custom_name)
+    elif parsed_args.song_ids:
+        for song_id in parsed_args.song_ids:
+            download_song_by_id(get_parse_id(song_id), config.DOWNLOAD_DIR, custom_name=custom_name)
+    elif parsed_args.artist_id:
+        download_hot_songs(get_parse_id(parsed_args.artist_id))
+    elif parsed_args.album_id:
+        download_album_songs(get_parse_id(parsed_args.album_id))
+    elif parsed_args.playlist_id:
+        download_playlist_songs(get_parse_id(parsed_args.playlist_id))
+    elif parsed_args.program_id:
+        download_program(get_parse_id(parsed_args.program_id))
 
 
 if __name__ == '__main__':
     main()
-    
+

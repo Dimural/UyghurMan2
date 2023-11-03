@@ -16,13 +16,14 @@ def get_song_info_by_id(song_id):
     return song
 
 
-def download_song_by_id(song_id, download_folder, sub_folder=True):
+def download_song_by_id(song_id, download_folder, custom_name=None, sub_folder=True):
     # get song info
     song = get_song_info_by_id(song_id)
-    download_song_by_song(song, download_folder, sub_folder)
+    song_name = custom_name or format_string(song['name'])
+    download_song_by_song(song, download_folder, sub_folder, custom_name=custom_name)
 
 
-def download_song_by_song(song, download_folder, sub_folder=True, program=False):
+def download_song_by_song(song, download_folder, sub_folder=True, program=False, custom_name=None):
     # get song info
     api = CloudApi()
     song_id = song['id']
@@ -35,13 +36,16 @@ def download_song_by_song(song, download_folder, sub_folder=True, program=False)
         album_name = format_string(song['album']['name'])
 
     # update song file name by config
-    song_file_name = '{}.mp3'.format(song_name)
-    switcher_song = {
-        1: song_file_name,
-        2: '{} - {}.mp3'.format(artist_name, song_name),
-        3: '{} - {}.mp3'.format(song_name, artist_name)
-    }
-    song_file_name = switcher_song.get(config.SONG_NAME_TYPE, song_file_name)
+    if custom_name:
+        song_file_name = '{}.mp3'.format(custom_name)
+    else:
+        song_file_name = '{}.mp3'.format(song_name)
+        switcher_song = {
+            1: song_file_name,
+            2: '{} - {}.mp3'.format(artist_name, song_name),
+            3: '{} - {}.mp3'.format(song_name, artist_name)
+            }
+        song_file_name = switcher_song.get(config.SONG_NAME_TYPE, song_file_name)
 
     # update song folder name by config, if support sub folder
     if sub_folder:
@@ -88,7 +92,7 @@ def download_song_by_song(song, download_folder, sub_folder=True, program=False)
     # add metadata for song
     song_file_path = os.path.join(song_download_folder, song_file_name)
     cover_file_path = os.path.join(song_download_folder, cover_file_name)
-    add_metadata_to_song(song_file_path, cover_file_path, song, program)
+    add_metadata_to_song(song_file_path, cover_file_path, song, program, custom_name=custom_name)
 
     # delete cover file
     os.remove(cover_file_path)
